@@ -125,7 +125,18 @@
             <div class='line'>
                 <div class='title'>游戏图片：</div>
                 <img :src='imgurl' width='50px' height="50px" v-if='imgurl' style='margin-right: 15px;'/>
-                <el-button @click='openImg' type='primary' plain size='small' style="margin-top: 15px; margin-bottom: 15px;">上传本地图片</el-button>
+                <!-- <el-button @click='openImg' type='primary' plain size='small' style="margin-top: 15px; margin-bottom: 15px;">上传本地图片</el-button> -->
+                 <el-upload
+                    class="upload-demo"
+                    action="https://box.jiawanhd.com/ssb/xcx/file/image"                  
+                    list-type="picture"
+                    :show-file-list="false"
+                    :on-success='successUpload'
+                    :on-error='failUpload'
+                    :limit=1
+                    :on-exceed="overLimit">
+                        <el-button size="mini" type="primary">上传本地图片</el-button>
+                </el-upload>
             </div>
             <div class='line'>
                 <div class='title'>图片url：</div>
@@ -450,6 +461,8 @@ export default {
                     type: 'success'
                 })
                 this.msgContent.content.pic = res.data[0]
+                this.imgurl=res.data[0]
+                
             }
             else {
                 this.$message({

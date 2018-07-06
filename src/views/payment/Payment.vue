@@ -209,12 +209,12 @@ export default {
                 {
                     prop: 'pkg',
                     label: '游戏包名',
-                    width: ''
+                    width: 180
                 },
                 {
                     prop: 'gamename',
                     label: '游戏名称',
-                    width: ''
+                    width: 120
                 },
                 {
                     prop: 'app_channel',
@@ -224,7 +224,7 @@ export default {
                 {
                     prop: 'channelName',
                     label: '用户渠道',
-                    width: ''
+                    width: 120
                 },
                 {
                     prop: 'createtime',

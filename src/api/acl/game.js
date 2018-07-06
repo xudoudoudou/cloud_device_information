@@ -11,6 +11,22 @@ export default {
             page: page
         }, success);
     },
+     /**
+      * 导入礼包
+      * @param {string} giftname 礼包名称
+      * @param {string} gamepkg 游戏包名
+      * @param {string} codetype 礼包类型
+      * @param {string} code 一码通礼包码
+      * @param {string} file 非一码通，礼包文件
+      * @param {string} remark 使用说明
+      * @param {string} srarday 有效期 开始时间
+      * @param {string} endday 有效期 结束时间
+      * @param {string} channelcode 渠道码
+      * @param {Function} success 回调
+      */
+     addgift(obj, success) {      
+         http.postBody('/games/addgift', obj, success);
+     },
     /**
      * 添加游戏
      * @param {string} gamename 游戏名称

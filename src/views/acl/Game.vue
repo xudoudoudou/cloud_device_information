@@ -23,8 +23,8 @@
             <el-table-column prop='gamename' label='游戏名称' width='160' align='center'></el-table-column>
             <el-table-column prop='channelobj.name' label='所属渠道' width='160' align='center'></el-table-column>
             <el-table-column prop='channelobj.code' label='渠道码' width='180' align='center'></el-table-column>
-            <el-table-column prop='apkpackage' label='包名' width='180' align='center'></el-table-column>
-            <el-table-column label='游戏图片地址' align='center'>
+            <el-table-column prop='apkpackage' label='包名' width='160' align='center'></el-table-column>
+            <el-table-column label='游戏图片地址' align='center' >
                 <template slot-scope='scope'>
                     <div style="display:flex; flex-direction: row;justify-content: center;">
                         <img :src='scope.row.pic' width='50px' height="50px" style='margin-right: 20px;'>
@@ -51,9 +51,16 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop='createtime' label='添加日期' width='160' align='center'></el-table-column>
-            <el-table-column label='操作' width='200' align="center">
+            <el-table-column prop='createtime' label='添加日期' width='160'  align='center'></el-table-column>
+            <el-table-column label='操作' align="center"  width='260'>
                 <template slot-scope='scope'>
+                     <el-dropdown>
+                        <el-button @click='toUpgit(scope.row,scope.row.id)' size='mini' type='primary'>
+                            导入礼包<i class="el-icon-arrow-down el-icon--right"></i>
+                        </el-button>
+                        <el-dropdown-menu slot="dropdown">礼包列表</el-dropdown-menu>
+                    </el-dropdown>
+                   
                     <el-button @click='toEdit(scope.row)' size='mini' type='primary'>编辑</el-button>
                     <el-button @click='toDel(scope.row.id)' size='mini' type='danger' plain>删除</el-button>
                 </template>
@@ -127,6 +134,46 @@
             <el-button @click='setHot' type='success' size='small' style='margin-left: 20px'>设置推荐</el-button>
             <input id='upIpt' @change='setImg' style='visibility: hidden' type='file'/>
         </el-dialog>
+        <el-dialog title='导入礼包' :visible.sync="showGit" width="600px" @close='showGit = false'>
+            <el-form label-width="80px" :model="giftBag">
+                <el-form-item label="礼包名称">
+                    <el-input v-model="giftBag.giftname"></el-input>
+                </el-form-item>
+                <el-form-item label="礼包类型:">
+                    <el-radio v-model="giftBag.codetype" label="1">一码通</el-radio>
+                    <el-radio v-model="giftBag.codetype" label="2">批量</el-radio>
+                </el-form-item>
+                <el-form-item label="礼包码:">
+                    <el-input v-model="giftBag.code" v-if="giftBag.codetype=='1'"></el-input>
+                    <el-button  v-if="giftBag.codetype=='2'" style="width:100%; background:rgb(242,242,242)" @click="upgiftCode">选择文件</el-button>
+                    <input type="file" id="giftcode" hidden/>
+                </el-form-item>
+                <el-form-item label="有效期:" >
+                    <el-radio v-model="forever" label="1" style="width:30%;">
+                        <el-button type="text" :disabled="disabled1" style="width:90%;" :style="disabled1?'background:rgb(242,242,242)':'background:rgb(250,250,250)'" >永久</el-button>
+                    </el-radio>
+                    <el-radio v-model="forever" label="2" style="display:inline;">
+                        <el-date-picker
+                        :disabled="disabled0"
+                        style="width:58%;"
+                        v-model="rangeTime"
+                        type="daterange"
+                        value-format="yyyy-MM-dd"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期">
+                    </el-date-picker>
+                    </el-radio>                   
+                </el-form-item>
+                <el-form-item label="使用说明:">
+                    <textarea v-model="giftBag.remark" style="width:100%;border-radius:5px;height:100px;"></textarea>
+                </el-form-item>
+                <el-form-item style="text-align:center">
+                    <el-button  type='success' @click="addgift($event)" style="width:40%">添加</el-button>
+                    <el-button type='info' @click='gitCancel' style="width:40%">取消</el-button>
+                </el-form-item>   
+            </el-form>
+        </el-dialog>
     </section>
 </template>
 
@@ -149,7 +196,7 @@ export default {
                     dlurl: '',
                     channel: '',
                     apkpackage:'',
-                    sort: ''
+                    sort: '',
                 }
             },
             pager: {
@@ -160,10 +207,38 @@ export default {
             isAdd: true,
             currentId: 0,
             showHot: false,
-            imgurl: ''
+            imgurl: '',
+            showGit:false,
+            rangeTime:[],
+            forever:'1',
+            giftBag:{
+                giftname:"",
+                gamepkg:"",
+                codetype:'1',
+                code:'',
+                remark:'',
+                starday:'',
+                endday:'',
+                
+            },
+            file:''
         }
     },
     computed: {
+        disabled0(){
+            if(this.forever=='1'){
+                return true
+            }else{
+                return false
+            }
+        },
+         disabled1(){
+            if(this.forever=='2'){
+                return true
+            }else{
+                return false
+            }
+        },
         ...mapState({
             channelList: state => state.channelList
         }),
@@ -240,6 +315,46 @@ export default {
                                         apkpackage:'',
                                         sort: 0
                                     }
+        },
+        gitCancel(){
+            this.showGit=false
+        },
+        //选择礼包码
+        upgiftCode(){
+            let code=document.getElementById('giftcode')
+            code.onchange=(e)=>{
+                this.file =e.target.files
+            }
+            code.click()
+        },
+        //导入礼包
+        toUpgit(row,id){
+            this.showGit=true         
+            sessionStorage.setItem('row',JSON.stringify(row))
+        },
+        addgift(e){
+            let sendata=new FormData()
+            sendata.append('file',this.file[0]);    
+            sendata.append('giftname',this.giftBag.giftname);
+            sendata.append('gamepkg',JSON.parse(sessionStorage.row).apkpackage);
+            sendata.append('gameid',JSON.parse(sessionStorage.row).id);
+            sendata.append('codetype',this.giftBag.codetype);
+            sendata.append('code',this.giftBag.code);
+            sendata.append('channelcode',JSON.parse(sessionStorage.row).channelobj.code);
+            sendata.append('remark',this.giftBag.remark);
+            sendata.append('starday',this.rangeTime[0]);
+            sendata.append('endday',this.rangeTime[1]);
+            this.$api.Game.addgift(sendata,res=>{
+                if(res){
+                    this.$message({
+                        message: '游戏礼包导入成功',
+                        type: 'success'
+                    })
+                    console.log('---',res)
+                    this.showGit=false
+                }
+                
+            })
         },
         toEdit(item) {
             this.isAdd = false

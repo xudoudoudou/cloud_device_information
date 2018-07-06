@@ -87,7 +87,7 @@
                     </el-popover>
                     <el-upload
                     class="upload-demo"
-                    action="/image/uploadimg"
+                    action="https://box.jiawanhd.com/ssb/xcx/file/image"                  
                     list-type="picture"
                     :on-success='successUpload'
                     :on-error='failUpload'
@@ -444,11 +444,12 @@ export default {
         },
         successUpload(res) {
             if(res.data.operationState != 'FAIL') {
+                console.log(res,'图片路径')
                 this.$message({
                     message: '图片上传成功！',
                     type: 'success'
                 })
-                this.msgContent.content.pic = res.data.url
+                this.msgContent.content.pic = res.data[0]
             }
             else {
                 this.$message({

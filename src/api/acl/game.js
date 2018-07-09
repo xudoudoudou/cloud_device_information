@@ -11,6 +11,57 @@ export default {
             page: page
         }, success);
     },
+    /**
+     * 游戏库列表
+     * @param {string} key 搜索关键词
+     * @param {number} page 页码
+     * @param {Function} success 回调
+     */
+    gamebaselist(page,key, success) {
+        http.get('games/lsbasegame', {
+            page: page,
+            key: key
+        }, success);
+    },
+    
+     /**
+     * 游戏库所有列表
+     * @param {Function} success 回调
+     */
+    lsbaseallgame(success) {
+        http.get('games/lsbaseallgame', success);
+    },
+    /**
+   * 添加游戏库
+   * @param {string} gamename 游戏名称
+   * @param {string} pic 游戏图片地址
+   * @param {string} apkpackage 包名
+   * @param {Function} success 回调
+   */
+    addbasegame(obj, success) {
+        http.postBody('games/addbasegame', obj  
+        ,success);
+    },
+    
+    /**
+     * 编辑游戏库
+     * @param {string} id ID
+     * @param {string} gamename 游戏名称
+     * @param {string} pic 游戏图片地址
+     * @param {Function} success 回调
+     */
+    editgamebase(obj, success) {
+        http.postBody('games/updbasegame',obj
+        , success);
+    },
+     /**
+     * 删除游戏库
+     * @param {string} id ID
+     * @param {Function} success 回调
+     */
+    deletegamebase (id, success) {
+        http.get('games/delbasegame?id='+id, success);
+    },
      /**
       * 导入礼包
       * @param {string} giftname 礼包名称

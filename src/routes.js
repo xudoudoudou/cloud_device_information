@@ -39,6 +39,8 @@ import Runtime from './views/monitor/Runtime.vue'
 import APM from './views/monitor/Apm.vue'
 import LoginLog from './views/monitor/LoginLog.vue'
 
+import GameDatabase from './views/gamedatabase/GameDatabase.vue'
+
 
 let routes = [
   {
@@ -133,6 +135,26 @@ let routes = [
           requiresAuth: true
         },
       }
+    ]
+  },
+  {
+    path:'/',
+    component: Home,
+    name:'游戏库管理',
+    iconCls: 'el-icon-circle-plus', //图标样式class
+    mata:{
+      requiresAuth:true
+    },
+    children:[
+      {
+        path: '/gamedatabase',
+        iconCls: 'el-icon-tickets',
+        component: GameDatabase,
+        name: '游戏包管理',
+        meta: {
+          requiresAuth: true
+        }
+      },
     ]
   },
   {

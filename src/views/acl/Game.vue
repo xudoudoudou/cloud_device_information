@@ -54,12 +54,12 @@
             <el-table-column prop='createtime' label='添加日期' width='160'  align='center'></el-table-column>
             <el-table-column label='操作' align="center"  width='260'>
                 <template slot-scope='scope'>
-                     <el-dropdown>
+                     <!-- <el-dropdown> -->
                         <el-button @click='toUpgit(scope.row,scope.row.id)' size='mini' type='primary'>
                             导入礼包<i class="el-icon-arrow-down el-icon--right"></i>
                         </el-button>
-                        <el-dropdown-menu slot="dropdown">礼包列表</el-dropdown-menu>
-                    </el-dropdown>
+                        <!-- <el-dropdown-menu slot="dropdown">礼包列表</el-dropdown-menu>
+                    </el-dropdown> -->
                    
                     <el-button @click='toEdit(scope.row)' size='mini' type='primary'>编辑</el-button>
                     <el-button @click='toDel(scope.row.id)' size='mini' type='danger' plain>删除</el-button>
@@ -77,15 +77,26 @@
         </el-pagination>
         <el-dialog :title='msgContent.title' :visible.sync="isShowContent" width='500px' @close='toCancel'>
             <el-form ref='form' :model='msgContent.content' label-width='100px'>
+                <el-form-item label='选择游戏' v-if="isAdd">
+                    <el-select @change='choosegame($event)' v-model="msgContent.content.gamename" filterable clearable placeholder="请选择游戏" >
+                        <el-option
+                        v-for="item in gamebaselist"
+                        :key="item.id"
+                        :label="item.gamename"
+                        :value="item.gamename">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label='游戏名称'>
-                    <el-input v-model='msgContent.content.gamename'></el-input>
+                    <el-input v-model='msgContent.content.gamename' :disabled="isAdd"></el-input>
                 </el-form-item>
                 <el-form-item label='游戏图片地址'>
                     <el-popover trigger='hover' placement="right">
                         <img :src='msgContent.content.pic' width='150px' height="150px">
-                        <el-input v-model='msgContent.content.pic' slot='reference'></el-input>
+                        <el-input v-model='msgContent.content.pic' slot='reference' :disabled="isAdd"></el-input>
                     </el-popover>
                     <el-upload
+                    v-if="!isAdd"
                     class="upload-demo"
                     action="https://box.jiawanhd.com/ssb/xcx/file/image"                  
                     list-type="picture"
@@ -96,11 +107,11 @@
                         <el-button size="mini" type="primary">上传本地图片</el-button>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label='游戏下载地址'>
-                    <el-input v-model='msgContent.content.dlurl'></el-input>
-                </el-form-item>
                 <el-form-item label='包名'>
                     <el-input v-model='msgContent.content.apkpackage' disabled></el-input>
+                </el-form-item>
+                <el-form-item label='游戏下载地址'>
+                    <el-input v-model='msgContent.content.dlurl'></el-input>
                 </el-form-item>
                 <el-form-item label='序号'>
                     <el-input v-model='msgContent.content.sort' placeholder="序号越小越靠前显示"></el-input>
@@ -143,7 +154,7 @@
                 <el-input v-model='imgurl' size='small' style='width: 350px'></el-input>
             </div>
             <el-button @click='setHot' type='success' size='small' style='margin-left: 20px'>设置推荐</el-button>
-            <input id='upIpt' @change='setImg' style='visibility: hidden' type='file'/>
+            <!-- <input id='upIpt' @change='setImg' style='visibility: hidden' type='file'/> -->
         </el-dialog>
         <el-dialog title='导入礼包' :visible.sync="showGit" width="600px" @close='showGit = false'>
             <el-form label-width="80px" :model="giftBag">
@@ -161,7 +172,7 @@
                 </el-form-item>
                 <el-form-item label="有效期:" >
                     <el-radio v-model="forever" label="1" style="width:30%;">
-                        <el-button type="text" :disabled="disabled1" style="width:90%;" :style="disabled1?'background:rgb(242,242,242)':'background:rgb(250,250,250)'" >永久</el-button>
+                        <el-button type="text" :disabled="disabled1" style="width:90%;" :style="disabled1?'background:rgb(245,247,250)':'background:rgb(252,252,254)'" >永久</el-button>
                     </el-radio>
                     <el-radio v-model="forever" label="2" style="display:inline;">
                         <el-date-picker
@@ -232,7 +243,8 @@ export default {
                 endday:'',
                 
             },
-            file:''
+            file:'',
+            gamebaselist:[]
         }
     },
     computed: {
@@ -251,7 +263,7 @@ export default {
             }
         },
         ...mapState({
-            channelList: state => state.channelList
+            channelList: state => state.channelList,
         }),
         dataList() {
             let list = this.gameList.sort((a, b) => {
@@ -279,10 +291,31 @@ export default {
             this.$api.Game.list(pageNo, res => {
                 if(res.pager.dataList) {
                     this.gameList = res.pager.dataList
-                    this.$store.dispatch('getChannel')
+                    this.$store.dispatch('getChannel')                
                     this.pager = res.pager.pager
                 }
-            })            
+            }) 
+                       
+        },
+        gamebase(){
+             this.$api.Game.lsbaseallgame(res=>{
+                let data=res.pager
+                if(data){
+                    this.gamebaselist=data
+                }
+            })
+        },
+        choosegame(val){        
+            this.gamebaselist.forEach(e => {
+                if(e.gamename==val){
+                    e.apkpackage=e.package
+                    this.msgContent.content=e
+                    this.msgContent.content.baseid=e.id
+                }
+                 
+                    
+        });
+                   
         },
         searchGame() {
             if(!this.chosedChannelId && !this.searchMsg) {
@@ -361,7 +394,6 @@ export default {
                         message: '游戏礼包导入成功',
                         type: 'success'
                     })
-                    console.log('---',res)
                     this.showGit=false
                 }
                 
@@ -372,6 +404,8 @@ export default {
             this.isShowContent = true
             this.msgContent.title = '编辑游戏'
             this.msgContent.content = item
+            this.msgContent.content.baseid=item.id
+            console.log(item)
         },
         toDel(id) {
             this.$confirm('确定删除此游戏吗？', '提示', {
@@ -436,7 +470,6 @@ export default {
                     this.isShowContent = false   
                 })
             }
-            
         },
         handlePage(e) {
             this.pager.pageNumber = e
@@ -528,6 +561,7 @@ export default {
     },
     mounted() {
         this.getData()
+        this.gamebase()
         const dlBtn = new Clipboard('.dlbtn')
         dlBtn.on('success', e => {
             this.$message({

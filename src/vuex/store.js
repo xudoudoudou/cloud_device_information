@@ -11,7 +11,11 @@ export default new Vuex.Store({
                     commit('saveChannelList', result.pager)
                 }
             })
+        },
+        getgamebaselist({ commit }, gamebaselist){
+            commit('savegamebaselist', gamebaselist)
         }
+
     },
     mutations: {
         save(state, user) {
@@ -38,7 +42,11 @@ export default new Vuex.Store({
         },
         saveChannelList(state, list) {
             state.channelList = list
+        },
+        savegamebaselist(state, gamebaselist){
+            state.gamebaselist = gamebaselist
         }
+
     },
     getters: {
         hasRole: (state, getters) => (role) => {
@@ -61,7 +69,8 @@ export default new Vuex.Store({
             mobile: '',
             roles: [],
             status: 'FAIL',
-            permissions: []
+            permissions: [],
+            gamebaselist:[]
         },
         menus: [],
         channelstree: [],

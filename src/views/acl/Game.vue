@@ -32,7 +32,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop='dlurl' label='游戏下载地址' align='center'>
+            <el-table-column prop='dlurl' label='游戏下载地址' width='90' align='center'>
                 <template slot-scope="scope">
                     <el-popover trigger='hover' placement="top">
                         <div>{{scope.row.dlurl}}</div>
@@ -77,7 +77,7 @@
         </el-pagination>
         <el-dialog :title='msgContent.title' :visible.sync="isShowContent" width='500px' @close='toCancel'>
             <el-form ref='form' :model='msgContent.content' label-width='100px'>
-                <el-form-item label='选择游戏' v-if="isAdd">
+                <el-form-item label='选择游戏'>
                     <el-select @change='choosegame($event)' v-model="msgContent.content.gamename" filterable clearable placeholder="请选择游戏" >
                         <el-option
                         v-for="item in gamebaselist"
@@ -88,14 +88,14 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label='游戏名称'>
-                    <el-input v-model='msgContent.content.gamename' :disabled="isAdd"></el-input>
+                    <el-input v-model='msgContent.content.gamename' disabled></el-input>
                 </el-form-item>
                 <el-form-item label='游戏图片地址'>
                     <el-popover trigger='hover' placement="right">
                         <img :src='msgContent.content.pic' width='150px' height="150px">
-                        <el-input v-model='msgContent.content.pic' slot='reference' :disabled="isAdd"></el-input>
+                        <el-input v-model='msgContent.content.pic' slot='reference' disabled></el-input>
                     </el-popover>
-                    <el-upload
+                    <!-- <el-upload
                     v-if="!isAdd"
                     class="upload-demo"
                     action="https://box.jiawanhd.com/ssb/xcx/file/image"                  
@@ -105,7 +105,7 @@
                     :limit=1
                     :on-exceed="overLimit">
                         <el-button size="mini" type="primary">上传本地图片</el-button>
-                    </el-upload>
+                    </el-upload> -->
                 </el-form-item>
                 <el-form-item label='包名'>
                     <el-input v-model='msgContent.content.apkpackage' disabled></el-input>

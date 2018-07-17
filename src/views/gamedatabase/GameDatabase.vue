@@ -23,6 +23,13 @@
             </el-table-column>
             <el-table-column label='操作' align="center"  width='260'>
                 <template slot-scope='scope'>
+                	<!-- <el-dropdown> -->
+                        <el-button @click='toUpgit(scope.row,scope.row.id)' size='mini' type='primary'>
+                            导入礼包
+                            <!-- <i class="el-icon-arrow-down el-icon--right"></i> -->
+                        </el-button>
+                        <!-- <el-dropdown-menu slot="dropdown">礼包列表</el-dropdown-menu>
+                    </el-dropdown> -->
                     <el-button @click='toEdit(scope.row)' size='mini' type='primary'>编辑</el-button>
                     <el-button @click='toDel(scope.row.id)' size='mini' type='danger' plain>删除</el-button>
                 </template>
@@ -65,6 +72,49 @@
                 <el-button @click='toCancel' type='text'>取消</el-button>
             </div>
         </el-dialog>
+        <el-dialog title='导入礼包' :visible.sync="showGit" width="600px" @close='showGit = false'>
+            <el-form label-width="80px" :model="giftBag">
+                <el-form-item label="礼包名称">
+                    <el-input v-model="giftBag.giftname"></el-input>
+                </el-form-item>
+                <el-form-item label="礼包类型:">
+                    <el-radio v-model="giftBag.codetype" label="1">一码通</el-radio>
+                    <el-radio v-model="giftBag.codetype" label="2">批量</el-radio>
+                </el-form-item>
+                <el-form-item label="礼包码:">
+                    <el-input v-model="giftBag.code" v-if="giftBag.codetype=='1'"></el-input>
+                    <el-button  v-if="giftBag.codetype=='2'" style="width:100%; background:rgb(242,242,242)" @click="upgiftCode">选择文件</el-button>
+                    <input type="file" id="giftcode" hidden/>
+                </el-form-item>
+                <el-form-item label="有效期:" >
+                    <el-radio v-model="forever" label="1" style="width:30%;">
+                        <el-button type="text" :disabled="disabled1" style="width:90%;" :style="disabled1?'background:rgb(245,247,250)':'background:rgb(252,252,254)'" >永久</el-button>
+                    </el-radio>
+                    <el-radio v-model="forever" label="2" style="display:inline;">
+                        <el-date-picker
+                        :disabled="disabled0"
+                        style="width:58%;"
+                        v-model="rangeTime"
+                        type="daterange"
+                        value-format="yyyy-MM-dd"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期">
+                    </el-date-picker>
+                    </el-radio>                   
+                </el-form-item>
+                <el-form-item label="使用说明:">
+                    <textarea v-model="giftBag.remark" style="width:100%;border-radius:5px;height:100px;"></textarea>
+                </el-form-item>
+                <el-form-item label='礼包内容'>
+                	<textarea v-model="giftBag.context" style="width:100%;border-radius:5px;height:100px;"></textarea>
+                </el-form-item>
+                <el-form-item style="text-align:center">
+                    <el-button  type='success' @click="addgift($event)" style="width:40%">添加</el-button>
+                    <el-button type='info' @click='gitCancel' style="width:40%">取消</el-button>
+                </el-form-item>  
+            </el-form>
+        </el-dialog>
     </section>
 </template>
 <script>
@@ -92,6 +142,21 @@ export default {
             },
             isShowContent:false,
             isadd:false,//新增
+            showGit:false,
+            forever:'1',
+            rangeTime:[],
+            file:'',
+            giftBag:{
+                giftname:"",
+                gamepkg:"",
+                codetype:'1',
+                code:'',
+                remark:'',
+                starday:'',
+                endday:'',
+                context:'',//礼包内容
+                
+            },
        }
    },
    mounted(){
@@ -110,9 +175,66 @@ export default {
             })
         })
    },
-   computed:{
-   },
+   computed: {
+        disabled0(){
+            if(this.forever=='1'){
+                return true
+            }else{
+                return false
+            }
+        },
+         disabled1(){
+            if(this.forever=='2'){
+                return true
+            }else{
+                return false
+            }
+        },
+    },
    methods:{
+   	    //选择礼包码
+        upgiftCode(){
+            let code=document.getElementById('giftcode')
+            code.onchange=(e)=>{
+                this.file =e.target.files
+            }
+            code.click()
+        },
+        //导入礼包
+   		toUpgit(row,id){
+            this.showGit=true
+            sessionStorage.setItem('getrowid',JSON.stringify(row))
+        },
+        addgift(e){
+            let sendata=new FormData()
+            sendata.append('file',this.file[0]);    
+            sendata.append('giftname',this.giftBag.giftname);//礼包名称
+            sendata.append('gameid',JSON.parse(sessionStorage.getrowid).id);//游戏id
+            sendata.append('codetype',this.giftBag.codetype);//礼包类型
+            sendata.append('code',this.giftBag.code);  //礼包码
+			sendata.append('gamepkg',JSON.parse(sessionStorage.getrowid).package);//游戏包名
+            sendata.append('remark',this.giftBag.remark);//礼包描述
+            sendata.append('remark',this.giftBag.context);//礼包描述
+            if(this.forever=='1'){
+            	this.rangeTime[0]=''
+            	this.rangeTime[1]=''
+            }
+        	sendata.append('starday',this.rangeTime[0]);
+            sendata.append('endday',this.rangeTime[1]);             
+            this.$api.Game.addgift(sendata,res=>{
+                if(res){
+                    this.$message({
+                        message: '游戏礼包导入成功',
+                        type: 'success'
+                    })
+                    this.showGit=false
+                }
+                
+            })
+        },
+        gitCancel(){
+            this.showGit=false
+        },
        handlePage(e) {
             this.pager.pageNumber = e
             this.getGamedatalist()

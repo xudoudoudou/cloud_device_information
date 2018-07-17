@@ -19,11 +19,11 @@
             </el-col>
         </el-row>
         <el-table :data='dataList' border>
-            <el-table-column prop='sort' label='序号' width='60' align='center'></el-table-column>
-            <el-table-column prop='gamename' label='游戏名称' width='160' align='center'></el-table-column>
-            <el-table-column prop='channelobj.name' label='所属渠道' width='160' align='center'></el-table-column>
-            <el-table-column prop='channelobj.code' label='渠道码' width='180' align='center'></el-table-column>
-            <el-table-column prop='apkpackage' label='包名' width='160' align='center'></el-table-column>
+            <el-table-column prop='sort' width="60" label='序号'  align='center'></el-table-column>
+            <el-table-column prop='gamename' label='游戏名称'  align='center'></el-table-column>
+            <el-table-column prop='channelobj.name' label='所属渠道'  align='center'></el-table-column>
+            <el-table-column prop='channelobj.code' width="180" label='渠道码'  align='center'></el-table-column>
+            <el-table-column prop='apkpackage' label='包名'  align='center'></el-table-column>
             <el-table-column label='游戏图片地址' align='center' >
                 <template slot-scope='scope'>
                     <div style="display:flex; flex-direction: row;justify-content: center;">
@@ -32,7 +32,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop='dlurl' label='游戏下载地址' width='90' align='center'>
+            <el-table-column prop='dlurl' label='游戏下载地址' align='center'>
                 <template slot-scope="scope">
                     <el-popover trigger='hover' placement="top">
                         <div>{{scope.row.dlurl}}</div>
@@ -51,13 +51,14 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop='createtime' label='添加日期' width='160'  align='center'></el-table-column>
+            <el-table-column prop='createtime' label='添加日期'  align='center'></el-table-column>
             <el-table-column label='操作' align="center"  width='260'>
                 <template slot-scope='scope'>
                      <!-- <el-dropdown> -->
-                        <el-button @click='toUpgit(scope.row,scope.row.id)' size='mini' type='primary'>
-                            导入礼包<i class="el-icon-arrow-down el-icon--right"></i>
-                        </el-button>
+                        <!--<el-button @click='toUpgit(scope.row,scope.row.id)' size='mini' type='primary'>-->
+                     
+                            <!-- <i class="el-icon-arrow-down el-icon--right"></i> -->
+                        <!--</el-button>-->
                         <!-- <el-dropdown-menu slot="dropdown">礼包列表</el-dropdown-menu>
                     </el-dropdown> -->
                    
@@ -138,6 +139,7 @@
                 <img :src='imgurl' width='50px' height="50px" v-if='imgurl' style='margin-right: 15px;'/>
                 <!-- <el-button @click='openImg' type='primary' plain size='small' style="margin-top: 15px; margin-bottom: 15px;">上传本地图片</el-button> -->
                  <el-upload
+                    ref="upload"
                     class="upload-demo"
                     action="https://box.jiawanhd.com/ssb/xcx/file/image"                  
                     list-type="picture"
@@ -145,8 +147,8 @@
                     :on-success='successUpload'
                     :on-error='failUpload'
                     :limit=1
-                    :on-exceed="overLimit">
-                        <el-button size="mini" type="primary">上传本地图片</el-button>
+                    >
+                        <el-button size="mini" type="primary" @click="upimg">上传本地图片</el-button>
                 </el-upload>
             </div>
             <div class='line'>
@@ -156,7 +158,7 @@
             <el-button @click='setHot' type='success' size='small' style='margin-left: 20px'>设置推荐</el-button>
             <!-- <input id='upIpt' @change='setImg' style='visibility: hidden' type='file'/> -->
         </el-dialog>
-        <el-dialog title='导入礼包' :visible.sync="showGit" width="600px" @close='showGit = false'>
+        <!--<el-dialog title='导入礼包' :visible.sync="showGit" width="600px" @close='showGit = false'>
             <el-form label-width="80px" :model="giftBag">
                 <el-form-item label="礼包名称">
                     <el-input v-model="giftBag.giftname"></el-input>
@@ -195,7 +197,7 @@
                     <el-button type='info' @click='gitCancel' style="width:40%">取消</el-button>
                 </el-form-item>   
             </el-form>
-        </el-dialog>
+        </el-dialog>-->
     </section>
 </template>
 
@@ -405,6 +407,7 @@ export default {
             this.msgContent.title = '编辑游戏'
             this.msgContent.content = item
             this.msgContent.content.baseid=item.id
+            sessionStorage.setItem('row',JSON.stringify(row))
             console.log(item)
         },
         toDel(id) {
@@ -480,11 +483,8 @@ export default {
                 this.getData()
             }
         },
-        overLimit(files, fileList) {
-            this.$message({
-                message: '请删除原有照片再上传！',
-                type: 'warning'
-            })
+        upimg(){
+            this.$refs.upload.clearFiles();
         },
         successUpload(res) {
             if(res.data.operationState != 'FAIL') {

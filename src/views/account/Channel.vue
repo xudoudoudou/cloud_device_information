@@ -36,6 +36,15 @@
             label="渠道码"
             show-overflow-tooltip>
             </el-table-column>
+            <el-table-column
+            align="center"
+            label="可用账号数"
+            >
+            <template slot-scope="scope">
+                
+                <span id="rednum" :style="{color: scope.row.usableNum<30? 'red': '' }">{{ scope.row.usableNum }}</span>
+            </template>
+            </el-table-column>
             <!-- <el-table-column
             prop="status"
             align="center"

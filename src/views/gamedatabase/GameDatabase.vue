@@ -496,6 +496,7 @@ export default {
             this.isShowContent = true
             this.msgContent.title = '新增游戏包'
             this.isadd = true
+            this.msgContent.content={}
         },
         toEdit(item) {
             this.isShowContent = true
